@@ -1,0 +1,2 @@
+# Render / root install — backend deps live in backend/requirements.txt
+-r backend/requirements.txt

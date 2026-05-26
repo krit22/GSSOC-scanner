@@ -1,0 +1,31 @@
+# Render Blueprint — backend API (repo root must include scout_core/ + projects.json)
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: gssoc-api
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: PYTHONPATH=. uvicorn app.main:app --host 0.0.0.0 --port $PORT --app-dir backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GITHUB_OAUTH_CLIENT_ID
+        sync: false
+      - key: GITHUB_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: CACHE_TTL_SECONDS
+        value: "1800"
+      - key: SCAN_CONCURRENCY
+        value: "3"
+      - key: PROJECTS_JSON_PATH
+        value: projects.json

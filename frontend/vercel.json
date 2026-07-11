@@ -2,11 +2,11 @@
     "rewrites": [
       {
         "source": "/api/:path*",
-        "destination": "https://gssoc-scanner.onrender.com/api/:path*"
+        "destination": "https://gssoc-scanner-7uc3.onrender.com/api/:path*"
       },
       {
         "source": "/auth/:path*",
-        "destination": "https://gssoc-scanner.onrender.com/auth/:path*"
+        "destination": "https://gssoc-scanner-7uc3.onrender.com/auth/:path*"
       }
     ]
   }

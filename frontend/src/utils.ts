@@ -30,3 +30,18 @@ export function formatDate(iso: string): string {
     day: "numeric",
   });
 }
+
+export function parseRepoFullName(repo: string): { owner: string; name: string } {
+  const slash = repo.indexOf("/");
+  if (slash === -1) return { owner: "", name: repo };
+  return { owner: repo.slice(0, slash), name: repo.slice(slash + 1) };
+}
+
+export function formatUpdatedLabel(iso: string): string {
+  const then = new Date(iso).getTime();
+  const sec = Math.floor((Date.now() - then) / 1000);
+  if (sec < 86400) return "updated today";
+  const d = Math.floor(sec / 86400);
+  if (d === 1) return "updated yesterday";
+  return `updated ${d}d ago`;
+}

@@ -10,9 +10,11 @@ import {
   triggerScan,
 } from "./api";
 import { Header } from "./components/Header";
+import { Hero } from "./components/Hero";
 import { IssuesTable } from "./components/IssuesTable";
 import { ProgressBar } from "./components/ProgressBar";
 import { ScanControls } from "./components/ScanControls";
+import { StaleScanPrompt } from "./components/StaleScanPrompt";
 import type { Feed, Issue, ScanResponse } from "./types";
 
 const POLL_MS = 2000;
@@ -42,6 +44,7 @@ export default function App() {
   const [displayScannedAt, setDisplayScannedAt] = useState<string | null>(null);
   const [displayFresh, setDisplayFresh] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
+  const [stalePromptDismissed, setStalePromptDismissed] = useState(false);
 
   useEffect(() => {
     const authToast = readAuthToast();
@@ -133,8 +136,21 @@ export default function App() {
 
   const progress = statusQuery.data;
 
+  const showStalePrompt =
+    !stalePromptDismissed &&
+    !scanning &&
+    displayScannedAt != null &&
+    !displayFresh &&
+    feedQuery.isSuccess &&
+    feedQuery.data?.status === "ready";
+
+  const handleStalePromptScan = () => {
+    setStalePromptDismissed(true);
+    scanMutation.mutate();
+  };
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       <Header
         user={userQuery.data}
         onLogin={() => {
@@ -144,7 +160,9 @@ export default function App() {
         loggingOut={logoutMutation.isPending}
       />
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+      <Hero issues={displayIssues} hasScanned={displayScannedAt != null} />
+
+      <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
         <ScanControls
           scannedAt={displayScannedAt}
           isFresh={displayFresh}
@@ -165,17 +183,30 @@ export default function App() {
         )}
 
         {feedQuery.isError && (
-          <p className="rounded-lg border border-red-900/50 bg-red-950/40 px-4 py-3 text-sm text-red-300">
+          <div
+            className="card-static border-red-900/50 bg-red-950/30 px-4 py-3 text-sm text-red-300"
+            role="alert"
+          >
             Could not load feed. Is the API running on port 8000?
-          </p>
+          </div>
         )}
 
         <IssuesTable issues={displayIssues} />
       </main>
 
-      <footer className="mx-auto max-w-5xl px-4 pb-10 text-center text-xs text-slate-600">
+      <footer className="mx-auto max-w-7xl px-4 pb-10 pt-2 text-center text-xs text-[var(--color-muted)] sm:px-6 lg:px-8">
         Results are shared across users for ~30 minutes after each scan.
       </footer>
+
+      {displayScannedAt && (
+        <StaleScanPrompt
+          scannedAt={displayScannedAt}
+          open={showStalePrompt}
+          scanning={scanning}
+          onScan={handleStalePromptScan}
+          onDismiss={() => setStalePromptDismissed(true)}
+        />
+      )}
 
       <Analytics />
     </div>
